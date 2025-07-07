@@ -5,6 +5,7 @@ import "./globals.css"
 import { Web3Provider } from "@/hooks/useWeb3"
 import { Header } from "@/components/layout/header"
 import { Toaster } from "@/components/ui/toaster"
+import ClickSpark from "@/components/ui/touchSpark"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -18,7 +19,6 @@ export const metadata: Metadata = {
     description: "Mint unique usernames as NFTs and send crypto with ease",
     type: "website",
   },
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -33,6 +33,12 @@ export default function RootLayout({
           <Header />
           <main className="flex-1">{children}</main>
           <Toaster />
+          <ClickSpark 
+            sparkColor='#fff'
+  sparkSize={10}
+  sparkRadius={15}
+  sparkCount={8}
+  duration={400}/>
         </Web3Provider>
       </body>
     </html>
