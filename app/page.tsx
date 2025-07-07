@@ -320,7 +320,7 @@ export default function HomePage() {
             onClick={handleConnect}
             isLoading={isLoading}
             size="xl"
-            className="bg-white text-[#005eff] hover:bg-white/90 text-lg lg:text-xl px-8 py-4"
+            className="bg-white text-orange-500 hover:bg-white/90 font-semibold text-lg lg:text-xl px-8 py-4"
             icon={<ArrowRight className="w-6 h-6" />}
             iconPosition="right"
           >
