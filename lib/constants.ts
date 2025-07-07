@@ -31,6 +31,14 @@ export const SUPPORTED_TOKENS = [
     name: "Privix Token",
     decimals: 18,
     isNative: true,
+    logo: "/placeholder-logo.svg",
+  },
+  {
+    address: "0x11F83ACa163083514C1393e67059983D58257a08",
+    symbol: "USDC",
+    name: "Privix USDC",
+    decimals: 18,
+    isNative: false,
   },
 ]
 

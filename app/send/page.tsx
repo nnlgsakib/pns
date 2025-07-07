@@ -10,10 +10,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { CurrencySelectorModal } from "@/components/ui/currency-selector-modal"
 import { ArrowLeft, Send, Wallet, CheckCircle, AlertCircle, Loader2, ArrowRight } from "lucide-react"
 import Link from "next/link"
-import { CONTRACTS } from "@/lib/constants"
+import { CONTRACTS, SUPPORTED_TOKENS } from "@/lib/constants"
+import { Badge } from "@/components/ui/badge"
 
 interface RecipientInfo {
   username: string
@@ -59,11 +60,20 @@ export default function SendPage() {
     }
   }, [recipientUsername])
 
+  useEffect(() => {
+    loadUserBalance()
+  }, [selectedToken])
+
   const loadUserBalance = async () => {
     if (!address) return
 
     try {
-      const balance = await web3Service.getBalance(address)
+      let balance = "0"
+      if (selectedToken.isNative) {
+        balance = await web3Service.getBalance(address)
+      } else {
+        balance = await web3Service.getTokenBalance(selectedToken.address, address)
+      }
       setUserBalance(balance)
     } catch (error) {
       console.error("Failed to load balance:", error)
@@ -85,7 +95,7 @@ export default function SendPage() {
     try {
       const userInfo = await web3Service.getUserInfo(username)
 
-      if (userInfo.address === "0x0000000000000000000000000000000000000000") {
+      if (userInfo.userAddress === "0x0000000000000000000000000000000000000000") {
         setRecipientInfo({
           username,
           address: "",
@@ -97,7 +107,7 @@ export default function SendPage() {
 
       setRecipientInfo({
         username,
-        address: userInfo.address,
+        address: userInfo.userAddress,
         isValid: true,
         isLoading: false,
       })
@@ -248,7 +258,15 @@ export default function SendPage() {
               <Label htmlFor="amount" className="text-white text-lg font-medium">
                 Amount
               </Label>
-              <p className="text-[#b0b0b0] text-sm mb-4">Enter the amount of PRIVIX to send</p>
+              <p className="text-[#b0b0b0] text-sm mb-4">Select token and enter the amount to send</p>
+
+              {/* Token Selector */}
+              <CurrencySelectorModal onSelect={setSelectedToken}>
+                <GradientButton variant="secondary" className="w-full mb-4">
+                  Select Token: {selectedToken.symbol}
+                </GradientButton>
+              </CurrencySelectorModal>
+
               <div className="relative">
                 <Input
                   id="amount"
@@ -256,16 +274,18 @@ export default function SendPage() {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.00"
-                  className="text-lg py-3 pr-20 bg-[#1a1a1a] border-[#2a2a2a] text-white"
+                  className="text-lg py-3 pr-24 bg-[#1a1a1a] border-[#2a2a2a] text-white"
                   step="0.0001"
                   min="0"
                 />
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#b0b0b0]">PRIVIX</div>
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#b0b0b0]">
+                  {selectedToken.symbol}
+                </div>
               </div>
 
               <div className="flex justify-between items-center mt-2">
                 <span className="text-[#b0b0b0] text-sm">
-                  Balance: {Number.parseFloat(userBalance).toFixed(4)} PRIVIX
+                  Balance: {Number.parseFloat(userBalance).toFixed(4)} {selectedToken.symbol}
                 </span>
                 <GradientButton
                   variant="secondary"
@@ -296,7 +316,7 @@ export default function SendPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#b0b0b0]">Amount:</span>
-                    <span className="text-white">{amount} PRIVIX</span>
+                    <span className="text-white">{amount} {selectedToken.symbol}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#b0b0b0]">Network Fee:</span>
@@ -354,10 +374,10 @@ export default function SendPage() {
             </div>
             <div>
               <h3 className="text-2xl font-bold text-white mb-2">Transaction Sent! 🎉</h3>
-              <p className="text-[#b0b0b0] mb-4">Your PRIVIX has been successfully sent</p>
+              <p className="text-[#b0b0b0] mb-4">Your {selectedToken.symbol} has been successfully sent</p>
               <div className="bg-[#1a1a1a] p-4 rounded-lg">
                 <p className="text-white">
-                  <span className="text-[#b0b0b0]">Sent:</span> {amount} PRIVIX
+                  <span className="text-[#b0b0b0]">Sent:</span> {amount} {selectedToken.symbol}
                 </p>
                 <p className="text-white">
                   <span className="text-[#b0b0b0]">To:</span> {recipientInfo?.username}.privix
@@ -396,7 +416,7 @@ export default function SendPage() {
               <Wallet className="w-8 h-8 text-[#005eff]" />
               <div>
                 <p className="text-[#b0b0b0] text-sm">Your Balance</p>
-                <p className="text-white text-xl font-bold">{Number.parseFloat(userBalance).toFixed(4)} PRIVIX</p>
+                <p className="text-white text-xl font-bold">{Number.parseFloat(userBalance).toFixed(4)} {selectedToken.symbol}</p>
               </div>
             </div>
             <Badge className="bg-[#00ff88]/20 text-[#00ff88]">Available</Badge>

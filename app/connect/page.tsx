@@ -10,6 +10,8 @@ import { Progress } from "@/components/ui/progress"
 import { CheckCircle, AlertCircle, Wallet, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
+import { SUPPORTED_TOKENS } from "@/lib/constants"
+
 const walletProviders = [
   {
     name: "MetaMask",
@@ -166,6 +168,19 @@ export default function ConnectPage() {
           <div className="inline-flex items-center space-x-2 text-sm text-[#b0b0b0] bg-[#1a1a1a] px-4 py-2 rounded-full">
             <div className="w-2 h-2 bg-[#00ff88] rounded-full animate-pulse"></div>
             <span>Privix Chain Testnet</span>
+          </div>
+        </div>
+
+        {/* Supported Tokens */}
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold text-white mb-4 text-center">Supported Tokens</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+            {SUPPORTED_TOKENS.map((token) => (
+              <AnimatedCard key={token.symbol} className="p-4 text-center">
+                <h4 className="font-semibold text-white">{token.name}</h4>
+                <p className="text-sm text-[#b0b0b0]">{token.symbol}</p>
+              </AnimatedCard>
+            ))}
           </div>
         </div>
       </div>

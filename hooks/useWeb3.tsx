@@ -103,6 +103,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
           // Check if still connected to the same account
           const accounts = await window.ethereum.request({ method: "eth_accounts" })
           if (accounts.length > 0 && accounts[0].toLowerCase() === storedAddress.toLowerCase()) {
+            await web3Service.connectWallet() // Re-initialize wallet client
             setAddress(storedAddress)
             setIsConnected(true)
             await loadUserProfile(storedAddress)

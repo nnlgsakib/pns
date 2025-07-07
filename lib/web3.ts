@@ -18,6 +18,7 @@ import {
   type TransactionReceipt,
 } from "viem"
 import { PRIVIX_CHAIN, CONTRACTS } from "./config"
+import { PRIVIX_CHAIN_CONFIG } from "./constants"
 
 // Registry Contract ABI - matches your Registry.sol
 const REGISTRY_ABI = [
@@ -271,8 +272,12 @@ export class Web3Service {
 
       // Check if we're on the correct network
       const chainId = await window.ethereum.request({ method: "eth_chainId" })
-      if (Number.parseInt(chainId, 16) !== PRIVIX_CHAIN.chainId) {
-        await this.switchToPrivixChain()
+      if (Number.parseInt(chainId, 16) !== PRIVIX_CHAIN_CONFIG.chainId) {
+        try {
+          await this.switchToPrivixChain()
+        } catch (error) {
+          throw new Error(`Please switch to the ${PRIVIX_CHAIN_CONFIG.name} network in your wallet.`)
+        }
       }
 
       const address = accounts[0]
@@ -508,6 +513,31 @@ export class Web3Service {
 
     const balance = await this.publicClient.getBalance({
       address: address as Address,
+    })
+
+    return formatEther(balance)
+  }
+
+  async getTokenBalance(tokenAddress: string, userAddress: string): Promise<string> {
+    this.ensureInitialized()
+
+    if (!this.publicClient) throw new Error("Public client not initialized")
+
+    const ERC20_ABI = [
+      {
+        inputs: [{ name: "owner", type: "address" }],
+        name: "balanceOf",
+        outputs: [{ name: "", type: "uint256" }],
+        stateMutability: "view",
+        type: "function",
+      },
+    ] as const
+
+    const balance = await this.publicClient.readContract({
+      address: tokenAddress as Address,
+      abi: ERC20_ABI,
+      functionName: "balanceOf",
+      args: [userAddress as Address],
     })
 
     return formatEther(balance)
